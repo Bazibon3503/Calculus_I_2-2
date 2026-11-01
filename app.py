@@ -1,4 +1,6 @@
 import datetime
+import os
+import matplotlib.font_manager as fm
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
@@ -6,13 +8,43 @@ import pandas as pd
 import requests
 import streamlit as st
 
+
+# ==========================================
+# 0. 리눅스(Streamlit Cloud) 환경 한글 폰트 설정
+# ==========================================
+def set_font():
+  import matplotlib
+
+  # 시스템에 맑은 고딕이 있으면 사용하고, 없으면 나눔고딕 설치 시도
+  font_path = None
+  for f in fm.findSystemFonts(fontpaths=None, fontext="ttf"):
+    if "NanumGothic" in f or "Malgun" in f:
+      font_path = f
+      break
+
+  # 만약 폰트가 없다면 나눔고딕을 우분투 환경에 다운로드
+  if not font_path and os.name != "nt":
+    os.system("apt-get update && apt-get install -y fonts-nanum > /dev/null 2>&1")
+    for f in fm.findSystemFonts(fontpaths=None, fontext="ttf"):
+      if "NanumGothic" in f:
+        font_path = f
+        break
+
+  if font_path:
+    font_name = fm.FontProperties(fname=font_path).get_name()
+    plt.rc("font", family=font_name)
+  else:
+    # 최후의 수단
+    plt.rc("font", family="sans-serif")
+
+  plt.rcParams["axes.unicode_minus"] = False
+
+
+set_font()
+
 # ==========================================
 # 1. 기본 설정
 # ==========================================
-
-plt.rc("font", family="Malgun Gothic")
-plt.rcParams["axes.unicode_minus"] = False
-
 DEFAULT_DATE = datetime.datetime.now().strftime("%Y%m%d")
 DEFAULT_TIME = "0500"
 DEFAULT_NX = 60
